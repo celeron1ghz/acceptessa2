@@ -1,0 +1,114 @@
+service: acceptessa2-cdn-circlecut
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: ap-northeast-1
+
+custom:
+  domain: familiar-life.info
+
+#  iam:
+#    role:
+#      statements:
+#        - Effect: "Allow"
+#          Action:
+#            - "s3:ListBucket"
+#          Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+#        - Effect: "Allow"
+#          Action:
+#            - "s3:PutObject"
+#          Resource:
+#            Fn::Join:
+#              - ""
+#              - - "arn:aws:s3:::"
+#                - "Ref" : "ServerlessDeploymentBucket"
+#                - "/*"
+
+#package:
+#  patterns:
+#    - '!exclude-me.js'
+#    - '!exclude-me-dir/**'
+#    - include-me.js
+#    - include-me-dir/**
+
+functions:
+  viewerRequest:
+    handler: handler.viewer_request
+
+  originResponse:
+    handler: handler.origin_response
+
+resources:
+  Description: serving acceptessa circlecut
+  Resources:
+    Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: "${self:service}"
+
+    # ViewerRequestFunctionVersion:
+    #   Type: AWS::Lambda::Version
+    #   Properties:
+    #     FunctionName: !Ref ViewerRequestFunction
+    #     Description: "A version of ViewerRequestFunction"
+
+    # OriginResponseFunctionVersion:
+    #   Type: AWS::Lambda::Version
+    #   Properties:
+    #     FunctionName: !Ref OriginResponseFunction
+    #     Description: "A version of OriginResponseFunction"
+
+    OriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: accceptessa circlecut
+
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      DependsOn: OriginAccessIdentity
+      Properties:
+        Bucket: { Ref: Bucket }
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Principal:
+                AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${OriginAccessIdentity}"
+              Resource:
+                Fn::Join: [ "/", [ { Fn::GetAtt: [ Bucket, Arn ] }, "*" ] ]
+
+    Cloudfront:
+      Type: AWS::CloudFront::Distribution
+      DependsOn: OriginAccessIdentity
+      Properties:
+        DistributionConfig:
+          Comment: acceptessa circlecut
+          # Aliases: ["circlecut.${self:custom.domain}"]
+          HttpVersion: http2
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: 'true'
+          DefaultCacheBehavior:
+            # LambdaFunctionAssociations:
+            #   - EventType: 'viewer-request'
+            #     LambdaFunctionARN: !Ref ViewerRequestFunctionVersion
+            #   - EventType: 'origin-response'
+            #     LambdaFunctionARN: !Ref OriginResponseFunctionVersion
+            TargetOriginId: s3
+            ViewerProtocolPolicy: allow-all
+            ForwardedValues:
+              QueryString: true
+              Headers: ["Origin"]
+            MinTTL: 86400
+            MaxTTL: 86400
+            DefaultTTL: 86400
+          Enabled: true
+          Origins:
+            - Id: s3
+              DomainName: "${self:service}.s3.amazonaws.com"
+              S3OriginConfig:
+                OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${OriginAccessIdentity}"
