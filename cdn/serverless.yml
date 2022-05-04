@@ -91,7 +91,7 @@ resources:
           # Aliases: ["circlecut.${self:custom.domain}"]
           HttpVersion: http2
           ViewerCertificate:
-            CloudFrontDefaultCertificate: 'true'
+            CloudFrontDefaultCertificate: true
           DefaultCacheBehavior:
             # LambdaFunctionAssociations:
             #   - EventType: 'viewer-request'
@@ -112,3 +112,13 @@ resources:
               DomainName: "${self:service}.s3.amazonaws.com"
               S3OriginConfig:
                 OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${OriginAccessIdentity}"
+
+    # RecordSet:
+    #   Type: AWS::Route53::RecordSet
+    #   Properties:
+    #     HostedZoneName: "${self:custom.domain}."
+    #     Type: CNAME
+    #     TTL: 300
+    #     Name: "circlecut.${self:custom.domain}."
+    #     ResourceRecords:
+    #       - Fn::Join: [ "", [ { Fn::GetAtt: [Cloudfront, DomainName] }, "." ] ]
