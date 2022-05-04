@@ -6,27 +6,20 @@ provider:
   runtime: nodejs12.x
   stage: dev
   region: us-east-1
+  versionFunctions: false
   deploymentBucket: serverless-upload-us-east-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - "logs:CreateLogGroup"
+            - "logs:CreateLogStream"
+            - "logs:PutLogEvents"
+          Resource: ["arn:aws:logs:*:*:*"]
 
 custom:
   domain: familiar-life.info
-
-#  iam:
-#    role:
-#      statements:
-#        - Effect: "Allow"
-#          Action:
-#            - "s3:ListBucket"
-#          Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#        - Effect: "Allow"
-#          Action:
-#            - "s3:PutObject"
-#          Resource:
-#            Fn::Join:
-#              - ""
-#              - - "arn:aws:s3:::"
-#                - "Ref" : "ServerlessDeploymentBucket"
-#                - "/*"
 
 #package:
 #  patterns:
@@ -38,13 +31,31 @@ custom:
 functions:
   viewerRequest:
     handler: handler.viewer_request
+    memorySize: 128
+    timeout: 5
 
   originResponse:
     handler: handler.origin_response
+    memorySize: 128
+    timeout: 30
 
 resources:
   Description: acceptessa circlecut
   Resources:
+    ## override
+    IamRoleLambdaExecution:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+                  - "edgelambda.amazonaws.com"
+              Action: ["sts:AssumeRole"]
+
     Bucket:
       Type: AWS::S3::Bucket
       Properties:
