@@ -1,51 +1,17 @@
 service: acceptessa2-test
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
 frameworkVersion: '3'
 
 provider:
   name: aws
   runtime: nodejs12.x
-  region: us-east-1
-#  iam:
-#    role:
-#      statements:
-#        - Effect: "Allow"
-#          Action:
-#            - "s3:ListBucket"
-#          Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#        - Effect: "Allow"
-#          Action:
-#            - "s3:PutObject"
-#          Resource:
-#            Fn::Join:
-#              - ""
-#              - - "arn:aws:s3:::"
-#                - "Ref" : "ServerlessDeploymentBucket"
-#                - "/*"
+  region: ap-northeast-1
 
 functions:
   main:
     handler: handler.main
-  events:
-    arn: [Fn::Join ]
-
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+    events:
+      - sqs:
+          arn:
+            Fn::Join:
+              - ":"
+              - ["arn:aws:sqs", { Ref: AWS::Region }, { Ref: AWS::AccountId }, "acceptessa2-command.fifo"]
