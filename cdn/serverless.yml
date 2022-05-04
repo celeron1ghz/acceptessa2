@@ -5,7 +5,8 @@ provider:
   name: aws
   runtime: nodejs12.x
   stage: dev
-  region: ap-northeast-1
+  region: us-east-1
+  deploymentBucket: serverless-upload-us-east-1
 
 custom:
   domain: familiar-life.info
@@ -42,24 +43,24 @@ functions:
     handler: handler.origin_response
 
 resources:
-  Description: serving acceptessa circlecut
+  Description: acceptessa circlecut
   Resources:
     Bucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: "${self:service}"
 
-    # ViewerRequestFunctionVersion:
-    #   Type: AWS::Lambda::Version
-    #   Properties:
-    #     FunctionName: !Ref ViewerRequestFunction
-    #     Description: "A version of ViewerRequestFunction"
+    ViewerRequestFunctionVersion:
+      Type: AWS::Lambda::Version
+      Properties:
+        FunctionName: !Ref ViewerRequestLambdaFunction
+        Description: "acceptessa circlecut ViewerRequestFunction"
 
-    # OriginResponseFunctionVersion:
-    #   Type: AWS::Lambda::Version
-    #   Properties:
-    #     FunctionName: !Ref OriginResponseFunction
-    #     Description: "A version of OriginResponseFunction"
+    OriginResponseFunctionVersion:
+      Type: AWS::Lambda::Version
+      Properties:
+        FunctionName: !Ref OriginResponseLambdaFunction
+        Description: "acceptessa circlecut OriginResponseFunction"
 
     OriginAccessIdentity:
       Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
@@ -93,11 +94,11 @@ resources:
           ViewerCertificate:
             CloudFrontDefaultCertificate: true
           DefaultCacheBehavior:
-            # LambdaFunctionAssociations:
-            #   - EventType: 'viewer-request'
-            #     LambdaFunctionARN: !Ref ViewerRequestFunctionVersion
-            #   - EventType: 'origin-response'
-            #     LambdaFunctionARN: !Ref OriginResponseFunctionVersion
+            LambdaFunctionAssociations:
+              - EventType: 'viewer-request'
+                LambdaFunctionARN: !Ref ViewerRequestFunctionVersion
+              - EventType: 'origin-response'
+                LambdaFunctionARN: !Ref OriginResponseFunctionVersion
             TargetOriginId: s3
             ViewerProtocolPolicy: allow-all
             ForwardedValues:
