@@ -1,9 +1,13 @@
 'use strict';
 
 module.exports.viewer_request = async (event) => {
-  return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
+  console.log(JSON.stringify(event, null, 2));
+  const req = event.Records[0].cf.request;
+  return req;
 };
 
 module.exports.origin_response = async (event) => {
-  return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
+  console.log(JSON.stringify(event, null, 2));
+  const req = event.Records[0].cf.request;
+  return req;
 };
