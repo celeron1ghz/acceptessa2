@@ -50,9 +50,15 @@ resource "aws_lambda_function" "viewer-request" {
   function_name    = var.appid
   role             = aws_iam_role.lambda.arn
   handler          = "handler.main"
-  /* source_code_hash = data.archive_file.basic_auth.output_base64sha256 */
   runtime          = "nodejs12.x"
   memory_size      = 128
   timeout          = 3
+  source_code_hash = data.archive_file.lambda-viewer-request.output_base64sha256
+
+  lifecycle {
+    ignore_changes = [
+      source_code_hash
+    ]
+  }
 }
 
