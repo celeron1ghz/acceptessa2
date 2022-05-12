@@ -2,6 +2,10 @@ variable "appid" {
   default = "acceptessa2-cdn"
 }
 
+variable "cert-domain" {
+  default = "*.familiar-life.info"
+}
+
 variable "fqdn" {
   default = "circlecut.familiar-life.info"
 }
@@ -17,10 +21,10 @@ resource "aws_iam_policy" "lambda" {
   policy = data.aws_iam_policy_document.lambda-policy.json
 }
 
-/* resource "aws_iam_role_policy_attachment" "lambda-attach" {
+resource "aws_iam_role_policy_attachment" "lambda-attach" {
   role       = aws_iam_role.lambda.name
   policy_arn = aws_iam_policy.lambda.arn
-} */
+}
 
 data "aws_iam_policy_document" "lambda-assume" {
   statement {
@@ -60,17 +64,16 @@ resource "aws_s3_bucket_policy" "policy" {
   policy = data.aws_iam_policy_document.bucket-policy.json
 }
 
-/* data "aws_acm_certificate" "domain" {
-  domain   = local.cert_fqdn
-  provider = aws.virginia
-} */
+data "aws_acm_certificate" "domain" {
+  domain   = var.cert-domain
+}
 
 data "aws_iam_policy_document" "bucket-policy" {
   statement {
     sid       = "1"
     effect    = "Allow"
     actions   = ["s3:GetObject"]
-    resources = ["arn:aws:s3:::${var.fqdn}/*"]
+    resources = ["arn:aws:s3:::${var.appid}/*"]
     principals {
       type        = "AWS"
       identifiers = [aws_cloudfront_origin_access_identity.oai.iam_arn]
@@ -122,7 +125,7 @@ resource "aws_cloudfront_distribution" "dist" {
   }
 
   viewer_certificate {
-    /* acm_certificate_arn = data.aws_acm_certificate.domain.arn */
+    acm_certificate_arn = data.aws_acm_certificate.domain.arn
     ssl_support_method  = "sni-only"
   }
 

@@ -3,7 +3,7 @@ locals {
 }
 
 provider "aws" {
-  region = "ap-northeast-1"
+  region = "us-east-1"
 }
 
 # terraform {
@@ -12,6 +12,6 @@ provider "aws" {
 #   backend "s3" {
 #     bucket = "xxxxxx"
 #     key    = "xxxxxx.tfstate"
-#     region = "ap-northeast-1"
+#     region = "us-east-1"
 #   }
 # }
