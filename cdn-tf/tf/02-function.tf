@@ -47,7 +47,7 @@ data "archive_file" "lambda-viewer-request" {
 
 resource "aws_lambda_function" "viewer-request" {
   filename         = data.archive_file.lambda-viewer-request.output_path
-  function_name    = var.appid
+  function_name    = "${var.appid}-viewer-request"
   role             = aws_iam_role.lambda.arn
   handler          = "handler.main"
   runtime          = "nodejs12.x"
