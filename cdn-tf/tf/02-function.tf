@@ -62,3 +62,20 @@ resource "aws_lambda_function" "viewer-request" {
   }
 }
 
+resource "aws_lambda_function" "origin-response" {
+  filename         = data.archive_file.lambda-template.output_path
+  function_name    = "${var.appid}-origin-response"
+  role             = aws_iam_role.lambda.arn
+  handler          = "handler.main"
+  runtime          = "nodejs14.x"
+  memory_size      = 128
+  timeout          = 30
+  source_code_hash = data.archive_file.lambda-template.output_base64sha256
+
+  lifecycle {
+    ignore_changes = [
+      source_code_hash
+    ]
+  }
+}
+
