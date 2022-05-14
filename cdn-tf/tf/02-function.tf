@@ -54,6 +54,7 @@ resource "aws_lambda_function" "viewer-request" {
   memory_size      = 128
   timeout          = 5
   source_code_hash = data.archive_file.lambda-template.output_base64sha256
+  publish          = true
 
   lifecycle {
     ignore_changes = [
@@ -71,6 +72,7 @@ resource "aws_lambda_function" "origin-response" {
   memory_size      = 128
   timeout          = 30
   source_code_hash = data.archive_file.lambda-template.output_base64sha256
+  publish          = true
 
   lifecycle {
     ignore_changes = [

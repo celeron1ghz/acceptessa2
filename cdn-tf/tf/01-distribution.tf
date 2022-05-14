@@ -12,7 +12,7 @@ resource "aws_s3_bucket_policy" "policy" {
 }
 
 data "aws_acm_certificate" "domain" {
-  domain   = var.cert-domain
+  domain = var.cert-domain
 }
 
 data "aws_iam_policy_document" "bucket-policy" {
@@ -29,15 +29,6 @@ data "aws_iam_policy_document" "bucket-policy" {
 }
 
 resource "aws_cloudfront_distribution" "dist" {
-  origin {
-    domain_name = aws_s3_bucket.bucket.bucket_domain_name
-    origin_id   = var.fqdn
-
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
-    }
-  }
-
   enabled             = true
   is_ipv6_enabled     = true
   comment             = var.fqdn
@@ -62,6 +53,27 @@ resource "aws_cloudfront_distribution" "dist" {
       cookies {
         forward = "none"
       }
+    }
+
+    lambda_function_association {
+      event_type   = "viewer-request"
+      lambda_arn   = aws_lambda_function.viewer-request.qualified_arn
+      include_body = false
+    }
+
+    lambda_function_association {
+      event_type   = "origin-response"
+      lambda_arn   = aws_lambda_function.origin-response.qualified_arn
+      include_body = false
+    }
+  }
+
+  origin {
+    domain_name = aws_s3_bucket.bucket.bucket_domain_name
+    origin_id   = var.fqdn
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
     }
   }
 
