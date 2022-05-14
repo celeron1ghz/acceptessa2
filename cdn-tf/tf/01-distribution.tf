@@ -1,15 +1,3 @@
-variable "appid" {
-  default = "acceptessa2-cdn"
-}
-
-variable "cert-domain" {
-  default = "*.familiar-life.info"
-}
-
-variable "fqdn" {
-  default = "circlecut.familiar-life.info"
-}
-
 resource "aws_cloudfront_origin_access_identity" "oai" {
   comment = var.appid
 }
