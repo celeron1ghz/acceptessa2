@@ -37,47 +37,53 @@ data "aws_iam_policy_document" "lambda-policy" {
     actions   = ["s3:ListBucket"]
     resources = ["arn:aws:s3:::${var.appid}"]
   }
+
+  statement {
+    sid    = "2"
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogStreams"
+    ]
+    resources = ["arn:aws:logs:*:*:*"]
+  }
 }
 
-data "archive_file" "lambda-template" {
+data "archive_file" "origin-response" {
   type        = "zip"
-  source_dir  = "lambda-template/src"
-  output_path = "lambda-template/lambda-template.zip"
+  source_dir  = "../lambda/origin-response/src"
+  output_path = "../lambda/origin-response/origin-response.zip"
+}
+
+data "archive_file" "viewer-request" {
+  type        = "zip"
+  source_dir  = "../lambda/viewer-request/src"
+  output_path = "../lambda/viewer-request/viewer-request.zip"
 }
 
 resource "aws_lambda_function" "viewer-request" {
-  filename         = data.archive_file.lambda-template.output_path
+  filename         = data.archive_file.viewer-request.output_path
   function_name    = "${var.appid}-viewer-request"
   role             = aws_iam_role.lambda.arn
-  handler          = "handler.main"
+  handler          = "handler.viewer_request"
   runtime          = "nodejs14.x"
   memory_size      = 128
   timeout          = 5
-  source_code_hash = data.archive_file.lambda-template.output_base64sha256
+  source_code_hash = data.archive_file.viewer-request.output_base64sha256
   publish          = true
-
-  lifecycle {
-    ignore_changes = [
-      source_code_hash
-    ]
-  }
 }
 
 resource "aws_lambda_function" "origin-response" {
-  filename         = data.archive_file.lambda-template.output_path
+  filename         = data.archive_file.origin-response.output_path
   function_name    = "${var.appid}-origin-response"
   role             = aws_iam_role.lambda.arn
-  handler          = "handler.main"
+  handler          = "handler.origin_response"
   runtime          = "nodejs14.x"
   memory_size      = 128
   timeout          = 30
-  source_code_hash = data.archive_file.lambda-template.output_base64sha256
+  source_code_hash = data.archive_file.origin-response.output_base64sha256
   publish          = true
-
-  lifecycle {
-    ignore_changes = [
-      source_code_hash
-    ]
-  }
 }
 
