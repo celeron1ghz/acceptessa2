@@ -34,8 +34,8 @@ data "aws_iam_policy_document" "lambda-policy" {
   statement {
     sid       = "1"
     effect    = "Allow"
-    actions   = ["s3:ListBucket"]
-    resources = ["arn:aws:s3:::${var.appid}"]
+    actions   = ["s3:GetObject"]
+    resources = ["arn:aws:s3:::${var.appid}/*"]
   }
 
   statement {
@@ -81,7 +81,7 @@ resource "aws_lambda_function" "origin-response" {
   role             = aws_iam_role.lambda.arn
   handler          = "handler.origin_response"
   runtime          = "nodejs14.x"
-  memory_size      = 128
+  memory_size      = 1024
   timeout          = 30
   source_code_hash = data.archive_file.origin-response.output_base64sha256
   publish          = true
