@@ -17,10 +17,16 @@ data "aws_acm_certificate" "domain" {
 
 data "aws_iam_policy_document" "bucket-policy" {
   statement {
-    sid       = "1"
-    effect    = "Allow"
-    actions   = ["s3:GetObject"]
-    resources = ["arn:aws:s3:::${var.appid}/*"]
+    sid    = "1"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket"
+    ]
+    resources = [
+      "arn:aws:s3:::${var.appid}",
+      "arn:aws:s3:::${var.appid}/*"
+    ]
     principals {
       type        = "AWS"
       identifiers = [aws_cloudfront_origin_access_identity.oai.iam_arn]
@@ -90,8 +96,14 @@ resource "aws_cloudfront_distribution" "dist" {
 
   custom_error_response {
     error_code         = "403"
-    response_code      = "200"
-    response_page_path = "/200.html"
+    response_code      = "403"
+    response_page_path = "/403.html"
+  }
+
+  custom_error_response {
+    error_code         = "404"
+    response_code      = "404"
+    response_page_path = "/404.html"
   }
 }
 
