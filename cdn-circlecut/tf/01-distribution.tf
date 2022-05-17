@@ -1,9 +1,9 @@
 resource "aws_cloudfront_origin_access_identity" "oai" {
-  comment = var.appid
+  comment = local.appid
 }
 
 resource "aws_s3_bucket" "bucket" {
-  bucket = var.appid
+  bucket = local.appid
 }
 
 resource "aws_s3_bucket_policy" "policy" {
@@ -12,7 +12,7 @@ resource "aws_s3_bucket_policy" "policy" {
 }
 
 data "aws_acm_certificate" "domain" {
-  domain = var.cert-domain
+  domain = local.cert-domain
 }
 
 data "aws_iam_policy_document" "bucket-policy" {
@@ -24,8 +24,8 @@ data "aws_iam_policy_document" "bucket-policy" {
       "s3:ListBucket"
     ]
     resources = [
-      "arn:aws:s3:::${var.appid}",
-      "arn:aws:s3:::${var.appid}/*"
+      "arn:aws:s3:::${local.appid}",
+      "arn:aws:s3:::${local.appid}/*"
     ]
     principals {
       type        = "AWS"
@@ -37,12 +37,12 @@ data "aws_iam_policy_document" "bucket-policy" {
 resource "aws_cloudfront_distribution" "dist" {
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = var.fqdn
+  comment             = local.fqdn
   default_root_object = "index.html"
-  aliases             = [var.fqdn]
+  aliases             = [local.fqdn]
 
   default_cache_behavior {
-    target_origin_id = var.fqdn
+    target_origin_id = local.fqdn
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
 
@@ -76,7 +76,7 @@ resource "aws_cloudfront_distribution" "dist" {
 
   origin {
     domain_name = aws_s3_bucket.bucket.bucket_domain_name
-    origin_id   = var.fqdn
+    origin_id   = local.fqdn
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
@@ -109,7 +109,7 @@ resource "aws_cloudfront_distribution" "dist" {
 
 /* resource "aws_route53_record" "record" {
   type    = "A"
-  name    = var.fqdn
+  name    = local.fqdn
   zone_id = var.zone_id
 
   alias {

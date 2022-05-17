@@ -1,21 +1,11 @@
 locals {
-  appid = "acceptessa2"
+  appid       = "acceptessa2-cdn"
+  cert-domain = "*.familiar-life.info"
+  fqdn        = "circlecut.familiar-life.info"
 }
 
 provider "aws" {
   region = "us-east-1"
-}
-
-variable "appid" {
-  default = "acceptessa2-cdn"
-}
-
-variable "cert-domain" {
-  default = "*.familiar-life.info"
-}
-
-variable "fqdn" {
-  default = "circlecut.familiar-life.info"
 }
 
 # terraform {

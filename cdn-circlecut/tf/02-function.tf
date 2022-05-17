@@ -1,11 +1,11 @@
 resource "aws_iam_role" "lambda" {
-  name               = var.appid
-  description        = "${var.appid} cdn function"
+  name               = local.appid
+  description        = "${local.appid} cdn function"
   assume_role_policy = data.aws_iam_policy_document.lambda-assume.json
 }
 
 resource "aws_iam_policy" "lambda" {
-  name   = var.appid
+  name   = local.appid
   policy = data.aws_iam_policy_document.lambda-policy.json
 }
 
@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "lambda-policy" {
     sid       = "1"
     effect    = "Allow"
     actions   = ["s3:GetObject"]
-    resources = ["arn:aws:s3:::${var.appid}/*"]
+    resources = ["arn:aws:s3:::${local.appid}/*"]
   }
 
   statement {
@@ -65,7 +65,7 @@ data "archive_file" "viewer-request" {
 
 resource "aws_lambda_function" "viewer-request" {
   filename         = data.archive_file.viewer-request.output_path
-  function_name    = "${var.appid}-viewer-request"
+  function_name    = "${local.appid}-viewer-request"
   role             = aws_iam_role.lambda.arn
   handler          = "handler.viewer_request"
   runtime          = "nodejs14.x"
@@ -77,7 +77,7 @@ resource "aws_lambda_function" "viewer-request" {
 
 resource "aws_lambda_function" "origin-response" {
   filename         = data.archive_file.origin-response.output_path
-  function_name    = "${var.appid}-origin-response"
+  function_name    = "${local.appid}-origin-response"
   role             = aws_iam_role.lambda.arn
   handler          = "handler.origin_response"
   runtime          = "nodejs14.x"
