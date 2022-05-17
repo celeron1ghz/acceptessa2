@@ -1,5 +1,5 @@
 locals {
-  appid       = "acceptessa2-cdn"
+  appid       = "acceptessa2-cdn-circlecut"
   cert-domain = "*.familiar-life.info"
   fqdn        = "circlecut.familiar-life.info"
 }
