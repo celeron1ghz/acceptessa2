@@ -31,6 +31,15 @@ data "aws_iam_policy_document" "lambda-assume" {
 
 data "aws_iam_policy_document" "lambda-policy" {
   statement {
+    sid    = "1"
+    effect = "Allow"
+    actions = [
+      "dynamodb:PutItem",
+    ]
+    resources = [aws_dynamodb_table.status.arn]
+  }
+
+  statement {
     sid    = "2"
     effect = "Allow"
     actions = [
@@ -58,7 +67,12 @@ resource "aws_lambda_function" "mail-handler" {
   memory_size      = 1024
   timeout          = 30
   source_code_hash = data.archive_file.template.output_base64sha256
-  publish          = true
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.status.id
+    }
+  }
 }
 
 resource "aws_sns_topic_subscription" "subscription" {
